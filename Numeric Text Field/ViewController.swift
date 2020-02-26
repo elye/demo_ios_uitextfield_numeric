@@ -4,6 +4,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
     static let DELEGATE_SIMPLE_FILTER = 100
     static let DELEGATE_COMPLEX_FILTER = 200
+    static let DELEGATE_WHOLENUMBER_FILTER = 300
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,23 +17,40 @@ class ViewController: UIViewController, UITextFieldDelegate {
         setupTextFiled(placeholder: "Number Pad Without Paste", yPos: 300, providedView: PastelessTextFiled())
             .keyboardType = .numberPad
 
-        _ = with(setupTextFiled(placeholder: "With Simple Delegate Filter", yPos: 350)) {
+        with(setupTextFiled(placeholder: "With Simple Delegate Filter", yPos: 350)) {
             $0.tag = ViewController.DELEGATE_SIMPLE_FILTER
             $0.delegate = self
         }
 
         setupTextFiled(placeholder: "With Target Editing", yPos: 400)
-            .addTarget(self, action: #selector(self.myTextFieldDidChange), for: .editingChanged)
+            .addTarget(self, action: #selector(self.textFieldFilter), for: .editingChanged)
 
-        _ = with(setupTextFiled(placeholder: "With Complex Delegate Filter", yPos: 450)) {
+        with(setupTextFiled(placeholder: "With Complex Delegate Filter", yPos: 450)) {
             $0.tag = ViewController.DELEGATE_COMPLEX_FILTER
+            $0.delegate = self
+        }
+
+        setupTextFiled(placeholder: "With WholeNumber Filter Editing", yPos: 500)
+            .addTarget(self, action: #selector(self.wholeNumberFilter), for: .editingChanged)
+
+        with(setupTextFiled(placeholder: "With WholeNumber Filter", yPos: 550)) {
+            $0.tag = ViewController.DELEGATE_WHOLENUMBER_FILTER
             $0.delegate = self
         }
     }
 
-    @objc private func myTextFieldDidChange(_ textField: UITextField) {
+    @objc private func textFieldFilter(_ textField: UITextField) {
         if let text = textField.text, let intText = Int(text) {
             textField.text = "\(intText)"
+        } else {
+            textField.text = ""
+        }
+    }
+
+    @objc private func wholeNumberFilter(_ textField: UITextField) {
+        if let text = textField.text,
+            let number = Decimal(string: text.filter { $0.isWholeNumber }) {
+            textField.text = "\(number)"
         } else {
             textField.text = ""
         }
@@ -45,9 +63,25 @@ class ViewController: UIViewController, UITextFieldDelegate {
            return (string.rangeOfCharacter(from: invalidCharacters) == nil)
         case ViewController.DELEGATE_COMPLEX_FILTER:
             return complexFilter(string, invalidCharacters, textField, range)
+        case ViewController.DELEGATE_WHOLENUMBER_FILTER:
+            return wholeNumberTextFieldFilter(string, invalidCharacters, textField, range)
         default:
             return true
         }
+    }
+
+    private func wholeNumberTextFieldFilter(_ string: String, _ invalidCharacters: CharacterSet, _ textField: UITextField, _ range: NSRange) -> Bool {
+        if (string.rangeOfCharacter(from: invalidCharacters) == nil) {
+            if let text = textField.text {
+                let str = (text as NSString).replacingCharacters(in: range, with: string)
+                if let number = Decimal(string: str.filter { $0.isWholeNumber }) {
+                    if (number <= Decimal(9_999_999_999_999_999)) { textField.text = "\(number)" }
+                    return false
+                }
+            }
+            return true
+        }
+        return false
     }
 
     private func complexFilter(_ string: String, _ invalidCharacters: CharacterSet, _ textField: UITextField, _ range: NSRange) -> Bool {
@@ -86,9 +120,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
 }
 
-public func with<T: AnyObject>(_ object: T, block: (T) -> Void) -> T {
+public func with<T: AnyObject>(_ object: T, block: (T) -> Void) {
     block(object)
-    return object
 }
 
 class PastelessTextFiled: UITextField {
