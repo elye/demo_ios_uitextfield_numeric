@@ -5,49 +5,42 @@ class ViewController: UIViewController, UITextFieldDelegate {
     static let DELEGATE_SIMPLE_FILTER = 100
     static let DELEGATE_COMPLEX_FILTER = 200
     static let DELEGATE_WHOLENUMBER_FILTER = 300
-    static let DELEGATE_WHOLENUMBER_FILTER_FORMAT = 400
     static let MAX_VALUE = 999_999_999_999_999_999
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        _ = setupTextFiled(placeholder: "Default TextField", yPos: 50)
+        _ = setupTextFiled(placeholder: "Default TextField", yPos: 100)
 
-        setupTextFiled(placeholder: "Number Pad Only", yPos: 100)
+        setupTextFiled(placeholder: "Number Pad Only", yPos: 150)
             .keyboardType = .numberPad
 
-        setupTextFiled(placeholder: "Number Pad Without Paste", yPos: 150, providedView: PastelessTextFiled())
+        setupTextFiled(placeholder: "Number Pad Without Paste", yPos: 200, providedView: PastelessTextFiled())
             .keyboardType = .numberPad
 
-        with(setupTextFiled(placeholder: "With Simple Delegate Filter", yPos: 200)) {
+        with(setupTextFiled(placeholder: "With Simple Delegate Filter", yPos: 250)) {
             $0.tag = ViewController.DELEGATE_SIMPLE_FILTER
             $0.delegate = self
         }
 
-        setupTextFiled(placeholder: "With Target Editing", yPos: 250)
+        setupTextFiled(placeholder: "With Target Editing", yPos: 300)
             .addTarget(self, action: #selector(self.textFieldFilter), for: .editingChanged)
 
-        with(setupTextFiled(placeholder: "With Complex Delegate Filter", yPos: 300)) {
+        with(setupTextFiled(placeholder: "With Complex Delegate Filter", yPos: 350)) {
             $0.tag = ViewController.DELEGATE_COMPLEX_FILTER
             $0.delegate = self
         }
 
-        setupTextFiled(placeholder: "With WholeNumber Filter Editing", yPos: 350)
+        setupTextFiled(placeholder: "With WholeNumber Filter Editing", yPos: 400)
             .addTarget(self, action: #selector(self.wholeNumberFilter), for: .editingChanged)
 
-        setupTextFiled(placeholder: "With WholeNumber Fixed Length Undo", yPos: 400)
+        setupTextFiled(placeholder: "With WholeNumber Fixed Length Undo", yPos: 450)
             .addTarget(self, action: #selector(self.wholeNumberFilterUndo), for: .editingChanged)
 
-        with(setupTextFiled(placeholder: "With WholeNumber Fixed Length", yPos: 450)) {
+        with(setupTextFiled(placeholder: "With WholeNumber Fixed Length", yPos: 500)) {
             $0.tag = ViewController.DELEGATE_WHOLENUMBER_FILTER
             $0.delegate = self
         }
-
-        with(setupTextFiled(placeholder: "With WholeNumber Format Fixed Length", yPos: 500)) {
-            $0.tag = ViewController.DELEGATE_WHOLENUMBER_FILTER_FORMAT
-            $0.delegate = self
-        }
-
     }
 
     @objc private func textFieldFilter(_ textField: UITextField) {
@@ -89,8 +82,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
             return complexFilter(string, invalidCharacters, textField, range)
         case ViewController.DELEGATE_WHOLENUMBER_FILTER:
             return wholeNumberTextFieldFilter(string, invalidCharacters, textField, range)
-        case ViewController.DELEGATE_WHOLENUMBER_FILTER_FORMAT:
-            return wholeNumberTextFieldFilterFormat(string, invalidCharacters, textField, range)
         default:
             return true
         }
@@ -102,20 +93,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 let str = (text as NSString).replacingCharacters(in: range, with: string)
                 if let number = Decimal(string: str.filter { $0.isWholeNumber }) {
                     if (number <= Decimal(ViewController.MAX_VALUE)) { textField.text = "\(number)" }
-                    return false
-                }
-            }
-            return true
-        }
-        return false
-    }
-
-    private func wholeNumberTextFieldFilterFormat(_ string: String, _ invalidCharacters: CharacterSet, _ textField: UITextField, _ range: NSRange) -> Bool {
-        if (string.rangeOfCharacter(from: invalidCharacters) == nil) {
-            if let text = textField.text {
-                let str = (text as NSString).replacingCharacters(in: range, with: string)
-                if let number = Decimal(string: str.filter { $0.isWholeNumber }) {
-                    if (number <= Decimal(ViewController.MAX_VALUE)) { textField.text = Formatter.currencyFormat.string(for: number) }
                     return false
                 }
             }
@@ -170,15 +147,4 @@ class PastelessTextFiled: UITextField {
             && (action == #selector(UIResponderStandardEditActions.cut)
             || action == #selector(UIResponderStandardEditActions.copy))
     }
-}
-
-private extension Formatter {
-    static let currencyFormat: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.numberStyle = .currency
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 0
-        return formatter
-    }()
 }
