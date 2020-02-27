@@ -104,15 +104,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
     private func complexFilter(_ string: String, _ invalidCharacters: CharacterSet, _ textField: UITextField, _ range: NSRange) -> Bool {
         if (string.rangeOfCharacter(from: invalidCharacters) == nil) {
             if let text = textField.text {
-                var str = (text as NSString).replacingCharacters(in: range, with: string)
-                if Set(str) == ["0"] {
-                    textField.text = "0"
-                    return false
-                } else if str.first == "0" {
-                    str.removeFirst()
-                    textField.text = str
-                    return false
+                let str = (text as NSString).replacingCharacters(in: range, with: string)
+                if let intText = Int(str) {
+                    textField.text = "\(intText)"
+                } else {
+                    textField.text = ""
                 }
+                return false
             }
             return true
         }
