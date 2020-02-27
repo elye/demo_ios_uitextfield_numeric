@@ -18,26 +18,26 @@ class ViewController: UIViewController, UITextFieldDelegate {
         setupTextFiled(placeholder: "Number Pad Without Paste", yPos: 200, providedView: PastelessTextFiled())
             .keyboardType = .numberPad
 
-        with(setupTextFiled(placeholder: "With Simple Delegate Filter", yPos: 250)) {
+        with(setupTextFiled(placeholder: "Robust 0-9 only entry", yPos: 250)) {
             $0.tag = ViewController.DELEGATE_SIMPLE_FILTER
             $0.delegate = self
         }
 
-        setupTextFiled(placeholder: "With Target Editing", yPos: 300)
+        setupTextFiled(placeholder: "Non 00 handling", yPos: 300)
             .addTarget(self, action: #selector(self.textFieldFilter), for: .editingChanged)
 
-        with(setupTextFiled(placeholder: "With Complex Delegate Filter", yPos: 350)) {
+        with(setupTextFiled(placeholder: "Reject centeral letters continous input", yPos: 350)) {
             $0.tag = ViewController.DELEGATE_COMPLEX_FILTER
             $0.delegate = self
         }
 
-        setupTextFiled(placeholder: "With WholeNumber Filter Editing", yPos: 400)
+        setupTextFiled(placeholder: "Elegant reject central letters", yPos: 400)
             .addTarget(self, action: #selector(self.wholeNumberFilter), for: .editingChanged)
 
-        setupTextFiled(placeholder: "With WholeNumber Fixed Length Undo", yPos: 450)
+        setupTextFiled(placeholder: "Fixed number length handling", yPos: 450)
             .addTarget(self, action: #selector(self.wholeNumberFilterUndo), for: .editingChanged)
 
-        with(setupTextFiled(placeholder: "With WholeNumber Fixed Length", yPos: 500)) {
+        with(setupTextFiled(placeholder: "Fixed number length without temp", yPos: 500)) {
             $0.tag = ViewController.DELEGATE_WHOLENUMBER_FILTER
             $0.delegate = self
         }
